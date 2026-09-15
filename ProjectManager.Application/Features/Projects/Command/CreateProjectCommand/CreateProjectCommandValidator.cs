@@ -7,8 +7,8 @@ namespace ProjectManager.Application.Features.Projects.Command.CreateProjectComm
 		public CreateProjectCommandValidator()
 		{
 			RuleFor(x => x.Name)
-				.NotEmpty().WithMessage("Title is required")
-				.MaximumLength(40).WithMessage("Maximum length for title is 40");
+				.NotEmpty().WithMessage("Project name is required")
+				.MaximumLength(40).WithMessage("Maximum length for project name is 40");
 		}
 	}
 }

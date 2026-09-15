@@ -18,17 +18,20 @@ namespace ProjectManager.Application.Features.Tasks.Commands.UpdateTaskCommand
 
 		public async Task Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
 		{
+			var task = await _taskRepository.GetByIdAsync(request.TaskId);
+			if (task is null)
+				throw new KeyNotFoundException($"Task with id {request.TaskId} is not found");
+
 			var project = await _projectRepository.GetByIdAsync(request.ProjectId);
+
 			if (project is null)
 				throw new KeyNotFoundException($"Project with id {request.ProjectId} is not found");
 
-			var task = new Domain.Task.Task
-			{
-				ProjectId = request.ProjectId,
-				Title = request.Title,
-				Description = request.Description,
-				Completed = request.Completed,
-			};
+			task.ProjectId = request.ProjectId;
+			task.Title = request.Title;
+			task.Description = request.Description;
+			task.Completed = request.Completed;
+
 			_taskRepository.Update(task);
 			await _uow.SaveChangesAsync(cancellationToken);
 		}

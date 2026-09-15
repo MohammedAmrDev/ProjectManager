@@ -27,7 +27,7 @@ namespace ProjectManager.API.Controllers
 			return Ok(result);
 		}
 
-		[HttpGet("{taskId}")]
+		[HttpGet("{taskId}", Name = "GetById")]
 		public async Task<IActionResult> GetById(Guid taskId)
 		{
 			var result = await _mediator.Send(new GetTaskByIdQuery(taskId));
@@ -45,7 +45,7 @@ namespace ProjectManager.API.Controllers
 		[HttpPut("{taskId}")]
 		public async Task<IActionResult> Update(Guid taskId, UpdateTaskRequest updateTaskRequest)
 		{
-			var command = new UpdateTaskCommand(updateTaskRequest.ProjectId, updateTaskRequest.Title, updateTaskRequest.Description, updateTaskRequest.Completed);
+			var command = new UpdateTaskCommand(taskId, updateTaskRequest.ProjectId, updateTaskRequest.Title, updateTaskRequest.Description, updateTaskRequest.Completed);
 			await _mediator.Send(command);
 			return CreatedAtRoute("GetById", new { taskId }, null);
 		}

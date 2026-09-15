@@ -32,7 +32,7 @@ namespace ProjectManager.API.Controllers
 		public async Task<IActionResult> Create(CreateProjectRequest createProjectRequest)
 		{
 			var taskId = await _mediator.Send(new CreateProjectCommand(createProjectRequest.Name));
-			return CreatedAtRoute("Get", new {  }, null);
+			return Ok(taskId);
 		}
 	}
 }
