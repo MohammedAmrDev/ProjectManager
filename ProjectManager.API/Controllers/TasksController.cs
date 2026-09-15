@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using ProjectManager.API.Requests;
+using ProjectManager.API.Requests.Tasks;
 using ProjectManager.Application.Features.Tasks.Commands.CreateTaskCommand;
+using ProjectManager.Application.Features.Tasks.Commands.DeleteTaskCommand;
+using ProjectManager.Application.Features.Tasks.Commands.UpdateTaskCommand;
 using ProjectManager.Application.Features.Tasks.Queries.GetTaskByIdQuery;
 using ProjectManager.Application.Features.Tasks.Queries.GetTasksQuery;
 
@@ -40,11 +42,20 @@ namespace ProjectManager.API.Controllers
 		}
 
 
-		[HttpPost]
-		public async Task<IActionResult> Create(CreateTaskRequest createTaskRequest)
+		[HttpPut("{taskId}")]
+		public async Task<IActionResult> Update(Guid taskId, UpdateTaskRequest updateTaskRequest)
 		{
-			var taskId = await _mediator.Send(new CreateTaskCommand(createTaskRequest.ProjectId, createTaskRequest.Title, createTaskRequest.Description));
+			var command = new UpdateTaskCommand(updateTaskRequest.ProjectId, updateTaskRequest.Title, updateTaskRequest.Description, updateTaskRequest.Completed);
+			await _mediator.Send(command);
 			return CreatedAtRoute("GetById", new { taskId }, null);
 		}
+
+		[HttpDelete("{taskId}")]
+		public async Task<IActionResult> Delete(Guid taskId)
+		{
+			await _mediator.Send(new DeleteTaskCommand(taskId));
+			return NoContent();
+		}
+
 	}
 }
