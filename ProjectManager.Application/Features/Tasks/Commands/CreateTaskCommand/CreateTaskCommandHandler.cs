@@ -28,9 +28,10 @@ namespace ProjectManager.Application.Features.Tasks.Commands.CreateTaskCommand
 				Title = request.Title,
 				Description = request.Description,
 			};
-			var taskId = await _taskRepository.AddAsync(task);
+
+			_taskRepository.Add(task);
 			await _uow.SaveChangesAsync(cancellationToken);
-			return taskId;
+			return task.Id;
 		}
 	}
 }

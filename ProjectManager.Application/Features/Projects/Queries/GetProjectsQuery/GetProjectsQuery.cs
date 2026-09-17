@@ -1,7 +1,5 @@
 ﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using ProjectManager.Application.Features.Projects.Common.DTOs;
 
 namespace ProjectManager.Application.Features.Projects.Queries.GetProjectsQuery
 {

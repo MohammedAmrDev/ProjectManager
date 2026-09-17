@@ -1,12 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManager.API.Requests.Projects;
-using ProjectManager.API.Requests.Tasks;
 using ProjectManager.Application.Features.Projects.Command.CreateProjectCommand;
 using ProjectManager.Application.Features.Projects.Queries.GetProjectsQuery;
-using ProjectManager.Application.Features.Tasks.Commands.CreateTaskCommand;
-using ProjectManager.Application.Features.Tasks.Commands.UpdateTaskCommand;
-using ProjectManager.Application.Features.Tasks.Queries.GetTasksQuery;
 
 namespace ProjectManager.API.Controllers
 {

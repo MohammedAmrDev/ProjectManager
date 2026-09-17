@@ -47,7 +47,7 @@ namespace ProjectManager.API.Controllers
 		{
 			var command = new UpdateTaskCommand(taskId, updateTaskRequest.ProjectId, updateTaskRequest.Title, updateTaskRequest.Description, updateTaskRequest.Completed);
 			await _mediator.Send(command);
-			return CreatedAtRoute("GetById", new { taskId }, null);
+			return NoContent();
 		}
 
 		[HttpDelete("{taskId}")]
@@ -56,6 +56,5 @@ namespace ProjectManager.API.Controllers
 			await _mediator.Send(new DeleteTaskCommand(taskId));
 			return NoContent();
 		}
-
 	}
 }

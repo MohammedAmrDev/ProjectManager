@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using ProjectManager.Application.Features.Projects.Common.DTOs;
 using ProjectManager.Application.Interfaces;
 
 namespace ProjectManager.Application.Features.Projects.Queries.GetProjectsQuery
@@ -15,7 +16,7 @@ namespace ProjectManager.Application.Features.Projects.Queries.GetProjectsQuery
 		public async Task<List<ProjectResponse>> Handle(GetProjectsQuery request, CancellationToken cancellationToken)
 		{
 			var projects = await _projectRepository.GetAllAsync();
-			return projects.Select(p => new ProjectResponse(p.Name, p.CreatedAt)).ToList();
+			return projects.Select(p => p.ToResponse()).ToList();
 		}
 	}
 }

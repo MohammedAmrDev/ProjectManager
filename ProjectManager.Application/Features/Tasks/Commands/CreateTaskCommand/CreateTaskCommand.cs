@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using ProjectManager.Application.Features.Tasks.Common.DTOs;
 
 namespace ProjectManager.Application.Features.Tasks.Commands.CreateTaskCommand
 {

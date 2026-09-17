@@ -16,7 +16,7 @@ namespace ProjectManager.Application.Features.Tasks.Queries.GetTasksQuery
 		public async Task<List<TaskResponse>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
 		{
 			var taskResponses = await _taskRepository.GetAllAsync(x => x.Project);
-			return taskResponses.Select(t => new TaskResponse(t.Project.Name, t.Title, t.Description, t.Completed)).ToList();
+			return [.. taskResponses.Select(t => t.ToResponse())];
 		}
 	}
 }
