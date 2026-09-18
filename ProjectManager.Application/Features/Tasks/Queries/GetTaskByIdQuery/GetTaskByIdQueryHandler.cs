@@ -15,7 +15,7 @@ namespace ProjectManager.Application.Features.Tasks.Queries.GetTaskByIdQuery
 
 		public async Task<TaskResponse?> Handle(GetTaskByIdQuery request, CancellationToken cancellationToken)
 		{
-			var task = await _taskRepository.GetByIdAsync(request.TaskId, true, x => x.Project);
+			var task = await _taskRepository.GetByIdAsync(request.TaskId, x => x.Project);
 			return task?.ToResponse();
 		}
 	}
