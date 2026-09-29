@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using ProjectManager.Application.Features.Projects.Common.DTOs;
-using ProjectManager.Application.Interfaces;
+using ProjectManager.Application.Interfaces.IRepositories;
 
 namespace ProjectManager.Application.Features.Projects.Queries.GetProjectsQuery
 {

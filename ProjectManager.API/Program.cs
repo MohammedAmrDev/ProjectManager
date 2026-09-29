@@ -1,28 +1,52 @@
-using FluentValidation;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using ProjectManager.Application.Behaviors;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using ProjectManager.API.Handlers;
+using ProjectManager.Application;
+using ProjectManager.Domain.Common.Settings;
 using ProjectManager.Infrastructure;
 using ProjectManager.Infrastructure.Data;
+using ProjectManager.Infrastructure.Identity.Entities;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration); // Repositories, DbContext and Identity
+builder.Services.AddApplication(); // MediatR and FluentValidation
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers();
 
-// EntityFramework
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+JwtOptions jwtOptions = builder.Configuration.GetSection("JwtSettings").Get<JwtOptions>()!;
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+	.AddJwtBearer(options =>
+	{
+		options.SaveToken = true;
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidIssuer = jwtOptions.Issuer,
+			ValidateAudience = true,
+			ValidAudience = jwtOptions.Audience,
+			ValidateIssuerSigningKey = true,
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+		};
+	});
 
-// MediatR and FluentValidation
-builder.Services.AddValidatorsFromAssembly(typeof(LoggingBehavior<,>).Assembly);
-builder.Services.AddMediatR(options => options.RegisterServicesFromAssemblies(typeof(LoggingBehavior<,>).Assembly));
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtSettings"));
 
+// Registering Identity
+builder.Services.AddIdentityCore<ApplicationUser>()
+	.AddRoles<ApplicationRole>()
+	.AddEntityFrameworkStores<ApplicationDbContext>()
+	.AddSignInManager();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -37,8 +61,29 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+
+// Place this code block in Program.cs right BEFORE app.Run();
+
+using (var scope = app.Services.CreateScope())
+{
+	var roleManager = scope.ServiceProvider.GetService<RoleManager<ApplicationRole>>()!;
+
+    // 1. Seed Roles
+    if (!await roleManager.RoleExistsAsync("Admin"))
+        await roleManager.CreateAsync(new ApplicationRole { Name = "Admin" });
+    
+    if (!await roleManager.RoleExistsAsync("User"))
+        await roleManager.CreateAsync(new ApplicationRole { Name = "User" });
+}
+
+app.Run();
+
+
 
 app.Run();

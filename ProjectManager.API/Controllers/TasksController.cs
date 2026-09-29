@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using ProjectManager.API.Extensions;
 using ProjectManager.API.Requests.Tasks;
 using ProjectManager.Application.Features.Tasks.Commands.CreateTaskCommand;
 using ProjectManager.Application.Features.Tasks.Commands.DeleteTaskCommand;
@@ -27,34 +28,33 @@ namespace ProjectManager.API.Controllers
 			return Ok(result);
 		}
 
-		[HttpGet("{taskId}", Name = "GetById")]
+		[HttpGet("{taskId}")]
 		public async Task<IActionResult> GetById(Guid taskId)
 		{
 			var result = await _mediator.Send(new GetTaskByIdQuery(taskId));
-			return result is null ? NotFound("Task is not found") : Ok(result);
+			return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetailsResult();
 		}
 
 		[HttpPost]
 		public async Task<IActionResult> Create(CreateTaskRequest createTaskRequest)
 		{
-			var taskId = await _mediator.Send(new CreateTaskCommand(createTaskRequest.ProjectId, createTaskRequest.Title, createTaskRequest.Description));
-			return CreatedAtRoute("GetById", new { taskId }, null);
+			var taskIdResult = await _mediator.Send(new CreateTaskCommand(createTaskRequest.ProjectId, createTaskRequest.Title, createTaskRequest.Description));
+			return taskIdResult.IsSuccess ? Ok(taskIdResult.Value) : taskIdResult.ToProblemDetailsResult();
 		}
-
 
 		[HttpPut("{taskId}")]
 		public async Task<IActionResult> Update(Guid taskId, UpdateTaskRequest updateTaskRequest)
 		{
-			var command = new UpdateTaskCommand(taskId, updateTaskRequest.ProjectId, updateTaskRequest.Title, updateTaskRequest.Description, updateTaskRequest.Completed);
-			await _mediator.Send(command);
-			return NoContent();
+			var command = new UpdateTaskCommand(taskId, updateTaskRequest.ProjectId, updateTaskRequest.Title, updateTaskRequest.Description, updateTaskRequest.TaskStatus);
+			var result = await _mediator.Send(command);
+			return result.IsSuccess ? Ok("Task updated successfully") : result.ToProblemDetailsResult();
 		}
 
 		[HttpDelete("{taskId}")]
 		public async Task<IActionResult> Delete(Guid taskId)
 		{
-			await _mediator.Send(new DeleteTaskCommand(taskId));
-			return NoContent();
+			var result = await _mediator.Send(new DeleteTaskCommand(taskId));
+			return result.IsSuccess ? Ok("Task deleted successfully") : result.ToProblemDetailsResult();
 		}
 	}
 }

@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using ProjectManager.Application.Interfaces;
 
 namespace ProjectManager.Application.Features.Tasks.Commands.UpdateTaskCommand
 {

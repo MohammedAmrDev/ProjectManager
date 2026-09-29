@@ -1,9 +1,11 @@
 ﻿using MediatR;
-using ProjectManager.Application.Interfaces;
+using ProjectManager.Application.Interfaces.IRepositories;
+using ProjectManager.Domain.Common.Result;
+using ProjectManager.Domain.Task;
 
 namespace ProjectManager.Application.Features.Tasks.Commands.DeleteTaskCommand
 {
-	public class DeleteTaskCommandHandler : IRequestHandler<DeleteTaskCommand>
+	public class DeleteTaskCommandHandler : IRequestHandler<DeleteTaskCommand, Result>
 	{
 		private readonly ITaskRepository _taskRepository;
 		private readonly IUnitOfWork _uow;
@@ -14,13 +16,14 @@ namespace ProjectManager.Application.Features.Tasks.Commands.DeleteTaskCommand
 			_uow = uow;
 		}
 
-		public async Task Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
+		public async Task<Result> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
 		{
 			var task = await _taskRepository.GetByIdAsync(request.TaskId);
 			if (task is null)
-				throw new KeyNotFoundException($"Task with id ${request.TaskId}");
+				return ProjectTaskErrors.TaskNotFound;
 			_taskRepository.Delete(task);
 			await _uow.SaveChangesAsync(cancellationToken);
+			return new();
 		}
 	}
 }

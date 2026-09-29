@@ -1,5 +1,10 @@
-﻿using ProjectManager.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage;
+using ProjectManager.Application.Interfaces.IRepositories;
+using ProjectManager.Domain.Common;
 using ProjectManager.Infrastructure.Data;
+using System.Data;
 
 namespace ProjectManager.Infrastructure.Repositories
 {
@@ -9,7 +14,26 @@ namespace ProjectManager.Infrastructure.Repositories
 		public UnitOfWork(ApplicationDbContext context) =>
 			_context = context;
 
-		public async Task<int> SaveChangesAsync(CancellationToken cancellationToken) =>
-			await _context.SaveChangesAsync(cancellationToken);
+		public IDbTransaction BeginTransaction() =>
+			_context.Database.BeginTransaction().GetDbTransaction();
+
+		public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+		{
+			var entries = _context.ChangeTracker.Entries<BaseEntity>();
+
+			foreach (var entry in entries)
+			{
+				if (entry.State == EntityState.Added)
+				{
+					entry.Entity.CreatedAt = DateTime.UtcNow;
+					entry.Entity.UpdateAt = DateTime.UtcNow;
+				}
+				else if (entry.State == EntityState.Modified)
+				{
+					entry.Entity.UpdateAt = DateTime.UtcNow;
+				}
+			}
+			return await _context.SaveChangesAsync(cancellationToken);
+		}
 	}
 }

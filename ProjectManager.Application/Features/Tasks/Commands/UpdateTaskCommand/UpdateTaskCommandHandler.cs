@@ -1,39 +1,39 @@
 ﻿using MediatR;
-using ProjectManager.Application.Interfaces;
+using ProjectManager.Application.Features.Tasks.Common.Helpers;
+using ProjectManager.Application.Interfaces.IRepositories;
+using ProjectManager.Domain.Common.Result;
+using ProjectManager.Domain.Project;
+using ProjectManager.Domain.Task;
 
 namespace ProjectManager.Application.Features.Tasks.Commands.UpdateTaskCommand
 {
-	public class UpdateTaskCommandHandler : IRequestHandler<UpdateTaskCommand>
+	public class UpdateTaskCommandHandler(ITaskRepository taskRepository, IProjectRepository projectRepository, IUnitOfWork uow) : IRequestHandler<UpdateTaskCommand, Result>
 	{
-		private readonly ITaskRepository _taskRepository;
-		private readonly IProjectRepository _projectRepository;
-		private readonly IUnitOfWork _uow;
-
-		public UpdateTaskCommandHandler(ITaskRepository taskRepository, IProjectRepository projectRepository, IUnitOfWork uow)
+		public async Task<Result> Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
 		{
-			_taskRepository = taskRepository;
-			_projectRepository = projectRepository;
-			_uow = uow;
-		}
-
-		public async Task Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
-		{
-			var task = await _taskRepository.GetByIdAsync(request.TaskId);
+			var task = await taskRepository.GetByIdAsync(request.TaskId);
 			if (task is null)
-				throw new KeyNotFoundException($"Task with id {request.TaskId} is not found");
+				return ProjectTaskErrors.TaskNotFound;
 
-			var project = await _projectRepository.GetByIdAsync(request.ProjectId);
-
+			var project = await projectRepository.GetByIdAsync(request.ProjectId);
 			if (project is null)
-				throw new KeyNotFoundException($"Project with id {request.ProjectId} is not found");
+				return ProjectErrors.ProjectNotFound;
+
+			var checkTaskStatus = task.CheckTaskStatusFlow(request.TaskStatus);
+			if (!checkTaskStatus)
+				return ProjectTaskErrors.TaskStatusFlowConlict(task.TaskStatus, request.TaskStatus);
+
 
 			task.ProjectId = request.ProjectId;
 			task.Title = request.Title;
 			task.Description = request.Description;
-			task.Completed = request.Completed;
+			task.TaskStatus = request.TaskStatus;
 
-			_taskRepository.Update(task);
-			await _uow.SaveChangesAsync(cancellationToken);
+			taskRepository.Update(task);
+			
+			await uow.SaveChangesAsync(cancellationToken);
+
+			return new();
 		}
 	}
 }

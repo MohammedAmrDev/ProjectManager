@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using ProjectManager.Application.Features.Projects.Common.DTOs;
-using ProjectManager.Application.Interfaces;
+using ProjectManager.Application.Interfaces.IRepositories;
 using ProjectManager.Domain.Project;
 
 namespace ProjectManager.Application.Features.Projects.Command.CreateProjectCommand

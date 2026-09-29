@@ -1,4 +1,4 @@
-﻿using ProjectManager.Application.Interfaces;
+﻿using ProjectManager.Application.Interfaces.IRepositories;
 using ProjectManager.Domain.Project;
 using ProjectManager.Infrastructure.Data;
 

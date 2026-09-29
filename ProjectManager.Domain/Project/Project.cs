@@ -1,4 +1,6 @@
-﻿namespace ProjectManager.Domain.Project
+﻿using ProjectManager.Domain.Common;
+
+namespace ProjectManager.Domain.Project
 {
 	public class Project : BaseEntity
 	{

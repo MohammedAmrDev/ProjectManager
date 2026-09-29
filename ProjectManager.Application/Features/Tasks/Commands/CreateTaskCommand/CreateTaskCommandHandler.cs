@@ -1,9 +1,11 @@
 ﻿using MediatR;
-using ProjectManager.Application.Interfaces;
+using ProjectManager.Application.Interfaces.IRepositories;
+using ProjectManager.Domain.Common.Result;
+using ProjectManager.Domain.Project;
 
 namespace ProjectManager.Application.Features.Tasks.Commands.CreateTaskCommand
 {
-	public class UpdateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Guid>
+	public class UpdateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Result<Guid>>
 	{
 		private readonly ITaskRepository _taskRepository;
 		private readonly IProjectRepository _projectRepository;
@@ -16,13 +18,13 @@ namespace ProjectManager.Application.Features.Tasks.Commands.CreateTaskCommand
 			_uow = uow;
 		}
 
-		public async Task<Guid> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
+		public async Task<Result<Guid>> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
 		{
 			var project = await _projectRepository.GetByIdAsync(request.ProjectId);
 			if (project is null)
-				throw new KeyNotFoundException($"Project with id {request.ProjectId} is not found");
+				return ProjectErrors.ProjectNotFound;
 
-			var task = new Domain.Task.Task
+			var task = new Domain.Task.ProjectTask
 			{
 				ProjectId = request.ProjectId,
 				Title = request.Title,

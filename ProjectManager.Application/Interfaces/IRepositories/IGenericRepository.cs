@@ -1,7 +1,7 @@
-﻿using ProjectManager.Domain;
+﻿using ProjectManager.Domain.Common;
 using System.Linq.Expressions;
 
-namespace ProjectManager.Application.Interfaces
+namespace ProjectManager.Application.Interfaces.IRepositories
 {
 	public interface IGenericRepository<T> where T : BaseEntity
 	{

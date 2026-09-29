@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ProjectManager.Application.Interfaces;
-using ProjectManager.Domain;
+using ProjectManager.Application.Interfaces.IRepositories;
+using ProjectManager.Domain.Common;
 using ProjectManager.Infrastructure.Data;
 using System.Linq.Expressions;
 
