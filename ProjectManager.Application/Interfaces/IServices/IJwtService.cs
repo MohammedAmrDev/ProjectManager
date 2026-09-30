@@ -1,5 +1,4 @@
 ﻿using ProjectManager.Application.DTOs;
-using ProjectManager.Domain.User;
 
 namespace ProjectManager.Application.Interfaces.IServices
 {

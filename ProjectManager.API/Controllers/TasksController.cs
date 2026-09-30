@@ -5,8 +5,10 @@ using ProjectManager.API.Requests.Tasks;
 using ProjectManager.Application.Features.Tasks.Commands.CreateTaskCommand;
 using ProjectManager.Application.Features.Tasks.Commands.DeleteTaskCommand;
 using ProjectManager.Application.Features.Tasks.Commands.UpdateTaskCommand;
+using ProjectManager.Application.Features.Tasks.Commands.UpdateTaskStatusCommand;
 using ProjectManager.Application.Features.Tasks.Queries.GetTaskByIdQuery;
 using ProjectManager.Application.Features.Tasks.Queries.GetTasksQuery;
+using ProjectManager.Domain.Task;
 
 namespace ProjectManager.API.Controllers
 {
@@ -22,17 +24,17 @@ namespace ProjectManager.API.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> Get()
+		public async Task<IActionResult> Get(Guid projectId)
 		{
-			var result = await _mediator.Send(new GetTasksQuery());
-			return Ok(result);
+			var taskResponsesResult = await _mediator.Send(new GetTasksQuery(projectId));
+			return taskResponsesResult.IsSuccess ? Ok(taskResponsesResult.Value) : taskResponsesResult.ToProblemDetailsResult();
 		}
 
 		[HttpGet("{taskId}")]
 		public async Task<IActionResult> GetById(Guid taskId)
 		{
-			var result = await _mediator.Send(new GetTaskByIdQuery(taskId));
-			return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetailsResult();
+			var taskResponseResult = await _mediator.Send(new GetTaskByIdQuery(taskId));
+			return taskResponseResult.IsSuccess ? Ok(taskResponseResult.Value) : taskResponseResult.ToProblemDetailsResult();
 		}
 
 		[HttpPost]
@@ -46,15 +48,23 @@ namespace ProjectManager.API.Controllers
 		public async Task<IActionResult> Update(Guid taskId, UpdateTaskRequest updateTaskRequest)
 		{
 			var command = new UpdateTaskCommand(taskId, updateTaskRequest.ProjectId, updateTaskRequest.Title, updateTaskRequest.Description, updateTaskRequest.TaskStatus);
-			var result = await _mediator.Send(command);
-			return result.IsSuccess ? Ok("Task updated successfully") : result.ToProblemDetailsResult();
+			var updateResult = await _mediator.Send(command);
+			return updateResult.IsSuccess ? Ok("Task updated successfully") : updateResult.ToProblemDetailsResult();
+		}
+
+		[HttpPatch("{taskId}")]
+		public async Task<IActionResult> UpdateTaskStatus(Guid taskId, ProjectTaskStatus taskStatus)
+		{
+			var command = new UpdateTaskStatusCommand(taskId, taskStatus);
+			var updateResult = await _mediator.Send(command);
+			return updateResult.IsSuccess ? Ok("Task updated successfully") : updateResult.ToProblemDetailsResult();
 		}
 
 		[HttpDelete("{taskId}")]
 		public async Task<IActionResult> Delete(Guid taskId)
 		{
-			var result = await _mediator.Send(new DeleteTaskCommand(taskId));
-			return result.IsSuccess ? Ok("Task deleted successfully") : result.ToProblemDetailsResult();
+			var deleteResult = await _mediator.Send(new DeleteTaskCommand(taskId));
+			return deleteResult.IsSuccess ? Ok("Task deleted successfully") : deleteResult.ToProblemDetailsResult();
 		}
 	}
 }

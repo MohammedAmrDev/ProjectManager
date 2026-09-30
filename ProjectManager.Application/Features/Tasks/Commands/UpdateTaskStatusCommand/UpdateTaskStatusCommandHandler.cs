@@ -20,6 +20,7 @@ namespace ProjectManager.Application.Features.Tasks.Commands.UpdateTaskStatusCom
 				return ProjectTaskErrors.TaskStatusFlowConlict(task.TaskStatus, request.TaskStatus);
 
 			task.TaskStatus = request.TaskStatus;
+			taskRepository.Update(task);
 			await uow.SaveChangesAsync(cancellationToken);
 
 			return new();

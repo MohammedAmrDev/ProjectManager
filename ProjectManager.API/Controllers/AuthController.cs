@@ -25,7 +25,7 @@ namespace ProjectManager.API.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> RefreshToken(string refreshToken)
+		public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
 		{
 			Result<AuthenticationResponse> authResponseResult = await authService.RefreshToken(refreshToken);
 			return authResponseResult.IsSuccess ? Ok(authResponseResult.Value) : authResponseResult.ToProblemDetailsResult();

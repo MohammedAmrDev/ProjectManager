@@ -6,5 +6,6 @@ namespace ProjectManager.Domain.Comment
 	{
 		public string Content { get; set; } = string.Empty;
 		public Guid TaskId { get; set; }
+		//public Guid AuthorId { get; set; }
 	}
 }

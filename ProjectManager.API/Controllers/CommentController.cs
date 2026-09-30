@@ -4,7 +4,6 @@ using ProjectManager.API.Extensions;
 using ProjectManager.Application.Features.Comments.Commands.CreateCommentCommand;
 using ProjectManager.Application.Features.Comments.Commands.DeleteCommentCommand;
 using ProjectManager.Application.Features.Comments.Queries.GetCommentsQuery;
-using ProjectManager.Domain.Common.Result;
 
 namespace ProjectManager.API.Controllers
 {
@@ -22,21 +21,21 @@ namespace ProjectManager.API.Controllers
 		[HttpGet("{taskId}")]
 		public async Task<IActionResult> Get(Guid taskId)
 		{
-			Result<List<CommentResponse>> result = await _mediator.Send(new GetCommentsQuery(taskId));
-			return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetailsResult();
+			var taskComments = await _mediator.Send(new GetCommentsQuery(taskId));
+			return Ok(taskComments);
 		}
 
 		[HttpPost("{taskId}")]
-		public async Task<IActionResult> Create(Guid taskId, string content)
+		public async Task<IActionResult> Create(Guid taskId, [FromBody] string content)
 		{
-			Result<Guid> commentIdResult = await _mediator.Send(new CreateCommentCommand(taskId, content));
+			var commentIdResult = await _mediator.Send(new CreateCommentCommand(taskId, content));
 			return commentIdResult.IsSuccess ? Ok(commentIdResult.Value) : commentIdResult.ToProblemDetailsResult();
 		}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> Delete(Guid id)
 		{
-			Result deleteResult = await _mediator.Send(new DeleteCommentCommand(id));
+			var deleteResult = await _mediator.Send(new DeleteCommentCommand(id));
 			return deleteResult.IsSuccess ? Ok("Delete successed") : deleteResult.ToProblemDetailsResult();
 		}
 	}

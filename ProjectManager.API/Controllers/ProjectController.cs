@@ -13,7 +13,6 @@ namespace ProjectManager.API.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
-	[Authorize]
 	public class ProjectController : ControllerBase
 	{
 		private readonly IMediator _mediator;
@@ -24,20 +23,22 @@ namespace ProjectManager.API.Controllers
 		}
 
 		[HttpGet]
+		[Authorize]
 		public async Task<IActionResult> Get()
 		{
-			var result = await _mediator.Send(new GetProjectsQuery());
-			return Ok(result);
+			var projectResponses = await _mediator.Send(new GetProjectsQuery());
+			return Ok(projectResponses);
 		}
 
 		[HttpGet("{projectId}")]
 		public async Task<IActionResult> GetById(Guid projectId)
 		{
-			var result = await _mediator.Send(new GetProjectQuery(projectId));
-			return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetailsResult();
+			var projectResult = await _mediator.Send(new GetProjectQuery(projectId));
+			return projectResult.IsSuccess ? Ok(projectResult.Value) : projectResult.ToProblemDetailsResult();
 		}
 
 		[HttpPost]
+		//[Authorize]
 		public async Task<IActionResult> Create(CreateProjectRequest createProjectRequest)
 		{
 			var projectId = await _mediator.Send(new CreateProjectCommand(createProjectRequest.Name));
@@ -45,17 +46,18 @@ namespace ProjectManager.API.Controllers
 		}
 
 		[HttpPut("{projectId}")]
+		//[Authorize] // project owner can only update
 		public async Task<IActionResult> Update(Guid projectId, string projectName)
 		{
-			var result = await _mediator.Send(new UpdateProjectCommand(projectId, projectName));
-			return result.IsSuccess ? Ok("Project updated successfully") : result.ToProblemDetailsResult();
+			var updateResult = await _mediator.Send(new UpdateProjectCommand(projectId, projectName));
+			return updateResult.IsSuccess ? Ok("Project updated successfully") : updateResult.ToProblemDetailsResult();
 		}
 
 		[HttpDelete("{projectId}")]
 		public async Task<IActionResult> Delete(Guid projectId)
 		{
-			var result = await _mediator.Send(new DeleteProjectCommand(projectId));
-			return result.IsSuccess ? Ok("Project deleted successfully") : result.ToProblemDetailsResult();
+			var deleteResult = await _mediator.Send(new DeleteProjectCommand(projectId));
+			return deleteResult.IsSuccess ? Ok("Project deleted successfully") : deleteResult.ToProblemDetailsResult();
 		}
 	}
 }

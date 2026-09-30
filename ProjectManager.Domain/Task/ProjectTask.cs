@@ -1,6 +1,4 @@
-﻿
-
-using ProjectManager.Domain.Common;
+﻿using ProjectManager.Domain.Common;
 
 namespace ProjectManager.Domain.Task
 {

@@ -1,22 +1,22 @@
 ﻿using MediatR;
 using ProjectManager.Application.Features.Tasks.Common.DTOs;
 using ProjectManager.Application.Interfaces.IRepositories;
+using ProjectManager.Domain.Common.Result;
+using ProjectManager.Domain.Project;
 
 namespace ProjectManager.Application.Features.Tasks.Queries.GetTasksQuery
 {
-	public class GetTasksQueryHandler : IRequestHandler<GetTasksQuery, List<TaskResponse>>
+	public class GetTasksQueryHandler(ITaskRepository taskRepository, IProjectRepository projectRepository) : IRequestHandler<GetTasksQuery, Result<List<TaskResponse>>>
 	{
-		private readonly ITaskRepository _taskRepository;
-
-		public GetTasksQueryHandler(ITaskRepository taskRepository)
+		public async Task<Result<List<TaskResponse>>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
 		{
-			_taskRepository = taskRepository;
-		}
+			var project = await projectRepository.GetByIdAsync(request.ProjectId);
+			if (project is null)
+				return ProjectErrors.ProjectNotFound;
 
-		public async Task<List<TaskResponse>> Handle(GetTasksQuery request, CancellationToken cancellationToken)
-		{
-			var taskResponses = await _taskRepository.GetAllAsync(x => x.Project);
-			return [.. taskResponses.Select(t => t.ToResponse())];
+
+			var taskResponses = await taskRepository.GetProjectTasksAsync(request.ProjectId);
+			return taskResponses.Select(t => t.ToResponse()).ToList();
 		}
 	}
 }
