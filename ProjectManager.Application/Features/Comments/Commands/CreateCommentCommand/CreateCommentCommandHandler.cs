@@ -18,6 +18,7 @@ namespace ProjectManager.Application.Features.Comments.Commands.CreateCommentCom
 			{
 				TaskId = request.TaskId,
 				Content = request.Content,
+				CreatedBy = request.CreateBy
 			};
 
 			commentRepository.Add(comment);

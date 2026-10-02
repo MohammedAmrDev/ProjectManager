@@ -1,9 +1,11 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManager.API.Extensions;
 using ProjectManager.Application.Features.Comments.Commands.CreateCommentCommand;
 using ProjectManager.Application.Features.Comments.Commands.DeleteCommentCommand;
 using ProjectManager.Application.Features.Comments.Queries.GetCommentsQuery;
+using System.Security.Claims;
 
 namespace ProjectManager.API.Controllers
 {
@@ -26,9 +28,11 @@ namespace ProjectManager.API.Controllers
 		}
 
 		[HttpPost("{taskId}")]
+		[Authorize]
 		public async Task<IActionResult> Create(Guid taskId, [FromBody] string content)
 		{
-			var commentIdResult = await _mediator.Send(new CreateCommentCommand(taskId, content));
+			var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+			var commentIdResult = await _mediator.Send(new CreateCommentCommand(taskId, content, Guid.Parse(userId)));
 			return commentIdResult.IsSuccess ? Ok(commentIdResult.Value) : commentIdResult.ToProblemDetailsResult();
 		}
 

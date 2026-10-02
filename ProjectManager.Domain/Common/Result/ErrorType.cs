@@ -3,11 +3,11 @@
 	public enum ErrorType
 	{
 		None,
-		NotFound,
-		Unauthorized,
-		Validation,
-		Conflict,
 		BadRequest,
+		Unauthorized,
 		Forbidden,
+		NotFound,
+		Conflict,
+		Validation,
 	}
 }

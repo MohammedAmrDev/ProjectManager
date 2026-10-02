@@ -3,17 +3,21 @@ using ProjectManager.Application.Features.Tasks.Common.Helpers;
 using ProjectManager.Application.Interfaces.IRepositories;
 using ProjectManager.Domain.Common.Result;
 using ProjectManager.Domain.Task;
+using ProjectManager.Domain.User;
 
 
 namespace ProjectManager.Application.Features.Tasks.Commands.UpdateTaskStatusCommand
 {
-	public class UpdateTaskStatusCommandHandler(ITaskRepository taskRepository, IUnitOfWork uow) : IRequestHandler<UpdateTaskStatusCommand, Result>
+	public class UpdateTaskStatusCommandHandler(ICurrentUserService currentUserService, ITaskRepository taskRepository, IUnitOfWork uow) : IRequestHandler<UpdateTaskStatusCommand, Result>
 	{
 		public async Task<Result> Handle(UpdateTaskStatusCommand request, CancellationToken cancellationToken)
 		{
 			var task = await taskRepository.GetByIdAsync(request.Id);
 			if (task == null)
 				return ProjectTaskErrors.TaskNotFound;
+
+			if (!currentUserService.IsAdmin || task.CreatedBy.ToString() != currentUserService.UserId)
+				return UserErrors.AccessDenied;
 
 			var checkTaskStatus = task.CheckTaskStatusFlow(request.TaskStatus);
 			if (!checkTaskStatus)

@@ -12,23 +12,23 @@ namespace ProjectManager.API.Extensions
 
 			var statusCode = result.Error.ErrorType switch
 			{
-				ErrorType.NotFound => StatusCodes.Status404NotFound,
-				ErrorType.Validation => StatusCodes.Status400BadRequest,
-				ErrorType.Conflict => StatusCodes.Status409Conflict,
 				ErrorType.BadRequest => StatusCodes.Status400BadRequest,
-				ErrorType.Forbidden => StatusCodes.Status403Forbidden,
 				ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+				ErrorType.Forbidden => StatusCodes.Status403Forbidden,
+				ErrorType.NotFound => StatusCodes.Status404NotFound,
+				ErrorType.Conflict => StatusCodes.Status409Conflict,
+				ErrorType.Validation => StatusCodes.Status400BadRequest,
 				_ => StatusCodes.Status500InternalServerError,
 			};
 
 			var problemTitle = result.Error.ErrorType switch
 			{
-				ErrorType.NotFound => "Resourse Not Found",
-				ErrorType.Validation => "Validation Error",
-				ErrorType.Conflict => "Conflict Occurred",
 				ErrorType.BadRequest => "Bad Request",
-				ErrorType.Forbidden => "Access Denied",
 				ErrorType.Unauthorized => "Unathorized Access",
+				ErrorType.Forbidden => "Access Denied",
+				ErrorType.NotFound => "Resourse Not Found",
+				ErrorType.Conflict => "Conflict Occurred",
+				ErrorType.Validation => "Validation Error",
 				_ => "Internal Server Error Occurred",
 			};
 

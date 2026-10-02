@@ -21,6 +21,7 @@ namespace ProjectManager.Application.Features.Projects.Command.CreateProjectComm
 			var project = new Project
 			{
 				Name = request.Name,
+				CreatedBy = request.CreateBy,
 			};
 
 			_projectRepository.Add(project);

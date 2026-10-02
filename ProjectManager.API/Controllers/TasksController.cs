@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectManager.API.Extensions;
 using ProjectManager.API.Requests.Tasks;
@@ -9,6 +10,7 @@ using ProjectManager.Application.Features.Tasks.Commands.UpdateTaskStatusCommand
 using ProjectManager.Application.Features.Tasks.Queries.GetTaskByIdQuery;
 using ProjectManager.Application.Features.Tasks.Queries.GetTasksQuery;
 using ProjectManager.Domain.Task;
+using System.Security.Claims;
 
 namespace ProjectManager.API.Controllers
 {
@@ -38,9 +40,11 @@ namespace ProjectManager.API.Controllers
 		}
 
 		[HttpPost]
+		[Authorize]
 		public async Task<IActionResult> Create(CreateTaskRequest createTaskRequest)
 		{
-			var taskIdResult = await _mediator.Send(new CreateTaskCommand(createTaskRequest.ProjectId, createTaskRequest.Title, createTaskRequest.Description));
+			var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+			var taskIdResult = await _mediator.Send(new CreateTaskCommand(createTaskRequest.ProjectId, createTaskRequest.Title, createTaskRequest.Description, Guid.Parse(userId)));
 			return taskIdResult.IsSuccess ? Ok(taskIdResult.Value) : taskIdResult.ToProblemDetailsResult();
 		}
 

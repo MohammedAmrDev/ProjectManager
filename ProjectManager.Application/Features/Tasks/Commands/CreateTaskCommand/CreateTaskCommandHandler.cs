@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using ProjectManager.Application.Interfaces.IRepositories;
 using ProjectManager.Domain.Common.Result;
 using ProjectManager.Domain.Project;
@@ -29,6 +30,7 @@ namespace ProjectManager.Application.Features.Tasks.Commands.CreateTaskCommand
 				ProjectId = request.ProjectId,
 				Title = request.Title,
 				Description = request.Description,
+				CreatedBy = request.CreateBy,
 			};
 
 			_taskRepository.Add(task);

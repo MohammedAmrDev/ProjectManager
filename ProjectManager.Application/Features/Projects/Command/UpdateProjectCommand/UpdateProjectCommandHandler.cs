@@ -2,10 +2,11 @@
 using ProjectManager.Application.Interfaces.IRepositories;
 using ProjectManager.Domain.Common.Result;
 using ProjectManager.Domain.Project;
+using ProjectManager.Domain.User;
 
 namespace ProjectManager.Application.Features.Projects.Command.UpdateProjectCommand
 {
-	public class UpdateProjectCommandHandler(IProjectRepository projectRepository, IUnitOfWork uow) : IRequestHandler<UpdateProjectCommand, Result>
+	public class UpdateProjectCommandHandler(ICurrentUserService currentUserService, IProjectRepository projectRepository, IUnitOfWork uow) : IRequestHandler<UpdateProjectCommand, Result>
 	{
 		public async Task<Result> Handle(UpdateProjectCommand request, CancellationToken cancellationToken)
 		{
@@ -13,6 +14,9 @@ namespace ProjectManager.Application.Features.Projects.Command.UpdateProjectComm
 
 			if (project == null)
 				return ProjectErrors.ProjectNotFound;
+
+			if (!currentUserService.IsAdmin || project.CreatedBy.ToString() != currentUserService.UserId)
+				return UserErrors.AccessDenied;
 
 			project.Name = request.Name;
 

@@ -8,6 +8,7 @@ using ProjectManager.Application.Features.Projects.Command.DeleteProjectCommand;
 using ProjectManager.Application.Features.Projects.Command.UpdateProjectCommand;
 using ProjectManager.Application.Features.Projects.Queries.GetProjectQuery;
 using ProjectManager.Application.Features.Projects.Queries.GetProjectsQuery;
+using System.Security.Claims;
 
 namespace ProjectManager.API.Controllers
 {
@@ -16,14 +17,15 @@ namespace ProjectManager.API.Controllers
 	public class ProjectController : ControllerBase
 	{
 		private readonly IMediator _mediator;
+		private readonly IAuthorizationService _authService;
 
-		public ProjectController(IMediator mediator)
+		public ProjectController(IMediator mediator, IAuthorizationService authService)
 		{
 			_mediator = mediator;
+			_authService = authService;
 		}
 
 		[HttpGet]
-		[Authorize]
 		public async Task<IActionResult> Get()
 		{
 			var projectResponses = await _mediator.Send(new GetProjectsQuery());
@@ -38,17 +40,18 @@ namespace ProjectManager.API.Controllers
 		}
 
 		[HttpPost]
-		//[Authorize]
+		[Authorize]
 		public async Task<IActionResult> Create(CreateProjectRequest createProjectRequest)
 		{
-			var projectId = await _mediator.Send(new CreateProjectCommand(createProjectRequest.Name));
+			var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+			var projectId = await _mediator.Send(new CreateProjectCommand(createProjectRequest.Name, Guid.Parse(userId)));
 			return Ok(projectId);
 		}
 
 		[HttpPut("{projectId}")]
-		//[Authorize] // project owner can only update
 		public async Task<IActionResult> Update(Guid projectId, string projectName)
 		{
+			await _authService.AuthorizeAsync(User, projectId, "OwnerPolicy");
 			var updateResult = await _mediator.Send(new UpdateProjectCommand(projectId, projectName));
 			return updateResult.IsSuccess ? Ok("Project updated successfully") : updateResult.ToProblemDetailsResult();
 		}

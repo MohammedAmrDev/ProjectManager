@@ -2,10 +2,11 @@
 using ProjectManager.Application.Interfaces.IRepositories;
 using ProjectManager.Domain.Common.Result;
 using ProjectManager.Domain.Project;
+using ProjectManager.Domain.User;
 
 namespace ProjectManager.Application.Features.Projects.Command.DeleteProjectCommand
 {
-	public class DeleteProjectCommandHandler(IProjectRepository projectRepository, IUnitOfWork uow) : IRequestHandler<DeleteProjectCommand, Result>
+	public class DeleteProjectCommandHandler(ICurrentUserService currentUserService, IProjectRepository projectRepository, IUnitOfWork uow) : IRequestHandler<DeleteProjectCommand, Result>
 	{
 		public async Task<Result> Handle(DeleteProjectCommand request, CancellationToken cancellationToken)
 		{
@@ -13,6 +14,9 @@ namespace ProjectManager.Application.Features.Projects.Command.DeleteProjectComm
 
 			if (project == null)
 				return ProjectErrors.ProjectNotFound;
+
+			if (!currentUserService.IsAdmin || project.CreatedBy.ToString() != currentUserService.UserId)
+				return UserErrors.AccessDenied;
 
 			projectRepository.Delete(project);
 			await uow.SaveChangesAsync(cancellationToken);

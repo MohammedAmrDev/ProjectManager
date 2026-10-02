@@ -15,6 +15,7 @@ namespace ProjectManager.Application
 			services.AddMediatR(options => options.RegisterServicesFromAssemblies(typeof(LoggingBehavior<,>).Assembly));
 			services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 			services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+			services.AddScoped<ICurrentUserService, CurrentUserService>();
 			services.AddScoped<IJwtService, JwtService>();
 
 			return services;
